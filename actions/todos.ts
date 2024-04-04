@@ -3,6 +3,8 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 
 export const getTodos = async () => {
+  const controller = new AbortController();
+  const { signal } = controller;
   const timeoutPromise = new Promise((_, reject) => {
     const timeout = 5000;
     setTimeout(() => {
@@ -13,6 +15,7 @@ export const getTodos = async () => {
   const fetchData = fetch(
     "https://jsonplaceholder.typicode.com/todos?_limit=10",
     {
+      signal,
       next: {
         tags: ["todos"],
       },
@@ -24,6 +27,8 @@ export const getTodos = async () => {
     fetchData,
   ])) as Response;
 
+  controller.abort();
+
   if (!response.ok) {
     throw new Error("An error occurred while fetching the data");
   }
@@ -32,6 +37,8 @@ export const getTodos = async () => {
 };
 
 export const getTodo = async (id: number) => {
+  const controller = new AbortController();
+  const { signal } = controller;
   const timeoutPromise = new Promise((_, reject) => {
     const timeout = 5000;
     setTimeout(() => {
@@ -40,6 +47,7 @@ export const getTodo = async (id: number) => {
   });
 
   const fetchData = fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
+    signal,
     next: {
       tags: [`todo-${id}`],
     },
@@ -49,6 +57,8 @@ export const getTodo = async (id: number) => {
     timeoutPromise,
     fetchData,
   ])) as Response;
+
+  controller.abort();
 
   if (!response.ok) {
     throw new Error("An error occurred while fetching the data");
