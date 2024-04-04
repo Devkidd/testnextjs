@@ -12,6 +12,7 @@ import { FormEvent, useContext, useState } from "react";
 import { getTodo } from "@/actions/todos";
 import Link from "next/link";
 import TodoContext from "@/context/TodoContext";
+import { toast } from "sonner";
 
 const todosID = Array.from({ length: 10 }, (_, i) => i + 1);
 
@@ -19,17 +20,20 @@ export const FormTodo = () => {
   const [idTodo, setIdTodo] = useState<number>(1);
   const { todos, addTodo } = useContext(TodoContext);
 
-  const handleLocalStorage = () => () => {
+  const handleLocalStorage = (e: FormEvent) => {
+    e.preventDefault();
     if (idTodo && localStorage.getItem(`active-todo`) !== idTodo.toString()) {
       localStorage.removeItem(`active-todo`);
       localStorage.setItem(`active-todo`, idTodo.toString());
+      toast("Todo enregistré dans le localStorage");
+    } else {
+      toast.error("Todo déjà enregistré dans le localStorage");
     }
   };
 
   const handleContext = async (e: FormEvent) => {
     e.preventDefault();
     const todo = await getTodo(idTodo);
-    console.log(todo);
     if (!todos.find((t) => t.id === todo.id)) addTodo(todo);
   };
 
@@ -52,7 +56,7 @@ export const FormTodo = () => {
         </SelectContent>
       </Select>
       <div className="flex gap-2 items-center mt-8">
-        <Button onClick={handleLocalStorage()}>Enregistrer LocalStorage</Button>
+        <Button onClick={handleLocalStorage}>Enregistrer LocalStorage</Button>
         <Button asChild disabled={!idTodo}>
           <Link href={`/todo/${idTodo}`}>Fetch server action</Link>
         </Button>

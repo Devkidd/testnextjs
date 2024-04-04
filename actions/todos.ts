@@ -3,7 +3,14 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 
 export const getTodos = async () => {
-  const response = await fetch(
+  const timeoutPromise = new Promise((_, reject) => {
+    const timeout = 5000;
+    setTimeout(() => {
+      reject(new Error("La requête a dépassé le temps d'attente"));
+    }, timeout);
+  });
+
+  const fetchData = fetch(
     "https://jsonplaceholder.typicode.com/todos?_limit=10",
     {
       next: {
@@ -11,6 +18,11 @@ export const getTodos = async () => {
       },
     }
   );
+
+  const response = (await Promise.race([
+    timeoutPromise,
+    fetchData,
+  ])) as Response;
 
   if (!response.ok) {
     throw new Error("An error occurred while fetching the data");
@@ -20,20 +32,30 @@ export const getTodos = async () => {
 };
 
 export const getTodo = async (id: number) => {
-  const response = await fetch(
-    `https://jsonplaceholder.typicode.com/todos/${id}`,
-    {
-      next: {
-        tags: [`todo-${id}`],
-      },
-    }
-  );
+  const timeoutPromise = new Promise((_, reject) => {
+    const timeout = 5000;
+    setTimeout(() => {
+      reject(new Error("La requête a dépassé le temps d'attente"));
+    }, timeout);
+  });
+
+  const fetchData = fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
+    next: {
+      tags: [`todo-${id}`],
+    },
+  });
+
+  const response = (await Promise.race([
+    timeoutPromise,
+    fetchData,
+  ])) as Response;
 
   if (!response.ok) {
     throw new Error("An error occurred while fetching the data");
   }
 
   revalidatePath("/");
+
   return await response.json();
 };
 

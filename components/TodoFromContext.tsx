@@ -9,8 +9,6 @@ import Link from "next/link";
 export const TodoFromContext = () => {
   const { todos, removeTodo } = useContext(TodoContext);
 
-  console.log(todos, "todos from context");
-
   if (!todos) {
     return;
   }
