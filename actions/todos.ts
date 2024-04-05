@@ -12,22 +12,24 @@ export const getTodos = async () => {
     }, timeout);
   });
 
-  const fetchData = fetch(
-    "https://jsonplaceholder.typicode.com/todos?_limit=10",
-    {
+  let fetchData;
+
+  try {
+    fetchData = fetch("https://jsonplaceholder.typicode.com/todos?_limit=10", {
       signal,
       next: {
         tags: ["todos"],
       },
-    }
-  );
+    });
+  } catch (error) {
+    console.error(error);
+    controller.abort();
+  }
 
   const response = (await Promise.race([
     timeoutPromise,
     fetchData,
   ])) as Response;
-
-  controller.abort();
 
   if (!response.ok) {
     throw new Error("An error occurred while fetching the data");
@@ -46,19 +48,24 @@ export const getTodo = async (id: number) => {
     }, timeout);
   });
 
-  const fetchData = fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
-    signal,
-    next: {
-      tags: [`todo-${id}`],
-    },
-  });
+  let fetchData;
+
+  try {
+    fetchData = fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
+      signal,
+      next: {
+        tags: [`todo-${id}`],
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    controller.abort();
+  }
 
   const response = (await Promise.race([
     timeoutPromise,
     fetchData,
   ])) as Response;
-
-  controller.abort();
 
   if (!response.ok) {
     throw new Error("An error occurred while fetching the data");
